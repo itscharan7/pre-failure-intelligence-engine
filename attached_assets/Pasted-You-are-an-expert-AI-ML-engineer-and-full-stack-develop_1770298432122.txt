@@ -1,0 +1,80 @@
+You are an expert AI/ML engineer and full-stack developer.
+
+I want you to build a complete, working project called:
+
+“Pre-Failure Intelligence System”
+
+Goal:
+Build an AI system that predicts machine failure BEFORE it happens and explains WHY the risk increases.
+
+Constraints:
+- Software-only project (no hardware)
+- Free and open-source tools only
+- Must be expo / competition ready
+- Must include explainable AI and premium UI
+
+Dataset:
+- Use NASA C-MAPSS Turbofan Engine Degradation Dataset
+- Use FD001 subset only
+- Use multivariate time-series sensor data
+
+AI / ML Requirements:
+1. Preprocess the data correctly (handle whitespace-separated NASA format).
+2. Perform feature engineering:
+   - Rolling mean
+   - Rolling standard deviation
+   - First-order difference
+3. Train an UNSUPERVISED model (no failure labels):
+   - Use Isolation Forest
+   - Train only on early-life (healthy) cycles
+4. Generate a continuous failure risk score (0–100%), not binary output.
+5. Handle early-stage numerical edge cases safely (avoid NaN/0-division).
+6. Integrate SHAP explainability to show which features contribute to risk.
+7. Save the trained model, scaler, and feature list for deployment.
+
+Deployment / UI Requirements:
+1. Build a Streamlit web application.
+2. Use a dark, futuristic dashboard UI with:
+   - Glassmorphism cards
+   - Neon accent colors
+   - Premium, startup-like appearance
+3. Include:
+   - Live sensor trend visualization
+   - Animated gauge meter showing failure risk
+   - Health status (Healthy / Warning / Critical)
+   - Maintenance recommendation text
+   - SHAP explainability panel (“Why risk increased?”)
+   - Progress bar showing lifecycle progression
+   - Restart simulation button
+4. Simulation should replay an engine’s lifecycle and END at end-of-life.
+
+Code Requirements:
+- Provide COMPLETE, runnable Python code
+- app.py must run using:
+  `streamlit run app.py`
+- Clearly specify folder structure:
+  models/, data/, app.py
+- Use Python 3.10 / 3.11 compatible libraries
+- Ensure deployment feature engineering EXACTLY matches training
+
+Explanation Requirements:
+- Explain the project simply and technically
+- Include a short judge-ready explanation
+- Explain how the AI works conceptually
+- Explain why this is better than threshold-based systems
+
+Do NOT:
+- Use IoT hardware
+- Use paid APIs
+- Skip explainability
+- Oversimplify the UI
+- Output partial code
+
+Deliverables:
+1. Data loading + training code
+2. Model saving code
+3. Full Streamlit dashboard code
+4. Explanation of system architecture
+5. Short judge explanation (30–60 seconds)
+
+Build this as a real, production-style AI project, not a toy demo.
