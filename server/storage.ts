@@ -1,38 +1,55 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import { db } from "./db";
+import { mlArtifacts, runs, type MlArtifact, type Run, type CreateRunRequest } from "@shared/schema";
+import { desc, eq } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getCurrentArtifact(): Promise<MlArtifact | null>;
+  upsertCurrentArtifact(artifact: MlArtifact): Promise<MlArtifact>;
+
+  listRuns(): Promise<Run[]>;
+  createRun(input: CreateRunRequest): Promise<Run>;
+  getRun(id: string): Promise<Run | null>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
+export class DatabaseStorage implements IStorage {
+  async getCurrentArtifact(): Promise<MlArtifact | null> {
+    const [row] = await db.select().from(mlArtifacts).limit(1);
+    return row ?? null;
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async upsertCurrentArtifact(artifact: MlArtifact): Promise<MlArtifact> {
+    const [row] = await db
+      .insert(mlArtifacts)
+      .values(artifact)
+      .onConflictDoUpdate({
+        target: mlArtifacts.id,
+        set: {
+          modelName: artifact.modelName,
+          modelVersion: artifact.modelVersion,
+          trainedOnDataset: artifact.trainedOnDataset,
+          trainedOnSubset: artifact.trainedOnSubset,
+          featureListJson: artifact.featureListJson,
+          notes: artifact.notes,
+        },
+      })
+      .returning();
+
+    return row;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async listRuns(): Promise<Run[]> {
+    return await db.select().from(runs).orderBy(desc(runs.startedAtIso));
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async createRun(input: CreateRunRequest): Promise<Run> {
+    const [row] = await db.insert(runs).values(input).returning();
+    return row;
+  }
+
+  async getRun(id: string): Promise<Run | null> {
+    const [row] = await db.select().from(runs).where(eq(runs.id, id)).limit(1);
+    return row ?? null;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
